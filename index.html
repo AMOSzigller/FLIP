@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>פליפ אינטימי</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 20px;
+            background-color: #006400;
+            color: white;
+        }
+        .player-list {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .player {
+            margin: 10px;
+        }
+        .player img {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+        }
+        .game-board {
+            margin-top: 20px;
+            position: relative;
+            width: 80%;
+            margin: auto;
+            background-color: #228B22;
+            border-radius: 15px;
+            padding: 20px;
+        }
+        .table {
+            position: relative;
+            width: 100%;
+            height: 300px;
+            border-radius: 50%;
+            background-color: #2E8B57;
+            margin: auto;
+        }
+        .community-cards {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: flex;
+        }
+        .community-cards span {
+            font-size: 20px;
+            margin: 5px;
+            padding: 5px 10px;
+            background: white;
+            color: black;
+            border-radius: 5px;
+        }
+        .player-card {
+            position: absolute;
+            width: 100px;
+            text-align: center;
+        }
+        .player-card img {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+        }
+    </style>
+</head>
+<body>
+    <h1>פליפ אינטימי</h1>
+    <p>בחרו בין 2 ל-9 שחקנים:</p>
+    <form id="player-selection">
+        <div class="player-list">
+            <div class="player">
+                <input type="checkbox" id="bar" value="בר">
+                <label for="bar">בר</label>
+            </div>
+            <div class="player">
+                <input type="checkbox" id="asimush" value="אסימוש">
+                <label for="asimush">אסימוש</label>
+            </div>
+            <div class="player">
+                <input type="checkbox" id="shuki" value="שוקי">
+                <label for="shuki">שוקי</label>
+            </div>
+            <div class="player">
+                <input type="checkbox" id="adi" value="עדי">
+                <label for="adi">עדי</label>
+            </div>
+            <div class="player">
+                <input type="checkbox" id="amitz" value="עמיץ">
+                <label for="amitz">עמיץ</label>
+            </div>
+            <div class="player">
+                <input type="checkbox" id="yunger" value="יונגר">
+                <label for="yunger">יונגר</label>
+            </div>
+            <div class="player">
+                <input type="checkbox" id="sagi" value="שגיא">
+                <label for="sagi">שגיא</label>
+            </div>
+            <div class="player">
+                <input type="checkbox" id="kasias" value="קסיאס">
+                <label for="kasias">קסיאס</label>
+            </div>
+            <div class="player">
+                <input type="checkbox" id="tzvika" value="צביקה">
+                <label for="tzvika">צביקה</label>
+            </div>
+            <div class="player">
+                <input type="checkbox" id="nadav" value="נדב">
+                <label for="nadav">נדב</label>
+            </div>
+        </div>
+        <button type="button" id="start-game">התחל משחק</button>
+        <button type="button" id="new-game" style="display: none;">משחק חדש</button>
+    </form>
+
+    <div class="game-board" id="game-board">
+        <div class="table" id="poker-table">
+            <div class="community-cards" id="community-cards"></div>
+        </div>
+    </div>
+
+    <script>
+        const players = [
+            { name: "בר", image: "AMOSzigller.jpg" },
+            { name: "אסימוש", image: "אסימוש.png" },
+            { name: "שוקי", image: "shuki.png" },
+            { name: "עדי", image: "Astrix.jpg" },
+            { name: "עמיץ", image: "gouchieeeee.jpg" },
+            { name: "יונגר", image: "yunger.png" },
+            { name: "שגיא", image: "שגיא.png" },
+            { name: "קסיאס", image: "קסיאס.png" },
+            { name: "צביקה", image: "צביקה.png" },
+            { name: "נדב", image: "נדב.png" }
+        ];
+
+        const deck = [];
+        const suits = ["♠", "♥", "♦", "♣"];
+        const ranks = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A"];
+
+        suits.forEach(suit => {
+            ranks.forEach(rank => {
+                deck.push({ rank, suit });
+            });
+        });
+
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function renderCard(card) {
+            return `${card.rank}${card.suit}`;
+        }
+
+        async function dealPlayerCards(selectedPlayers, playerHands) {
+            const gameBoard = document.getElementById('poker-table');
+
+            // Reveal cards to players one at a time
+            for (let round = 0; round < 2; round++) {
+                for (let i = 0; i < selectedPlayers.length; i++) {
+                    const playerDiv = document.getElementById(`player-${i}`);
+                    const card = playerHands[i][round];
+                    const cardElement = document.createElement('span');
+                    cardElement.textContent = renderCard(card);
+                    playerDiv.appendChild(cardElement);
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                }
+            }
+        }
+
+        async function revealCommunityCards(communityCards) {
+            const communityDiv = document.getElementById('community-cards');
+
+            for (let i = 0; i < communityCards.length; i++) {
+                const card = communityCards[i];
+                const cardElement = document.createElement('span');
+                cardElement.textContent = renderCard(card);
+                communityDiv.appendChild(cardElement);
+                await new Promise(resolve => setTimeout(resolve, 1000));
+            }
+        }
+
+        document.getElementById('start-game').addEventListener('click', async () => {
+            const selectedPlayers = Array.from(document.querySelectorAll('#player-selection input:checked'))
+                .map(checkbox => checkbox.value);
+
+            if (selectedPlayers.length < 2 || selectedPlayers.length > 9) {
+                alert('אנא בחרו בין 2 ל-9 שחקנים.');
+                return;
+            }
+
+            // Disable start button and inputs
+            document.getElementById('start-game').disabled = true;
+            document.querySelectorAll('#player-selection input').forEach(input => input.disabled = true);
+
+            shuffle(deck);
+            const playerHands = selectedPlayers.map(() => [deck.pop(), deck.pop()]);
+            const communityCards = [deck.pop(), deck.pop(), deck.pop(), deck.pop(), deck.pop()];
+
+            // Place players around the table
+            const gameBoard = document.getElementById('poker-table');
+            const tableRadius = 150;
+            selectedPlayers.forEach((playerName, index) => {
+                const angle = (index / selectedPlayers.length) * 2 * Math.PI;
+                const x = tableRadius * Math.cos(angle) + gameBoard.offsetWidth / 2;
+                const y = tableRadius * Math.sin(angle) + gameBoard.offsetHeight / 2;
+                const player = players.find(p => p.name === playerName);
+
+                const playerDiv = document.createElement('div');
+                playerDiv.classList.add('player-card');
+                playerDiv.style.left = `${x}px`;
+                playerDiv.style.top = `${y}px`;
+                playerDiv.id = `player-${index}`;
+                playerDiv.innerHTML = `
+                    <img src="${player.image}" alt="${player.name}">
+                    <p>${player.name}</p>
+                `;
+                gameBoard.appendChild(playerDiv);
+            });
+
+            // Deal cards to players
+            await dealPlayerCards(selectedPlayers, playerHands);
+
+            // Reveal community cards
+            await revealCommunityCards(communityCards);
+
+            // Announce winner (placeholder logic)
+            const winnerIndex = Math.floor(Math.random() * selectedPlayers.length);
+            const winnerName = selectedPlayers[winnerIndex];
+            const winnerDiv = document.createElement('div');
+            winnerDiv.innerHTML = `<h2>המנצח: ${winnerName}</h2>`;
+            gameBoard.appendChild(winnerDiv);
+
+            // Enable new game button
+            document.getElementById('new-game').style.display = 'inline-block';
+        });
+
+        document.getElementById('new-game').addEventListener('click', () => {
+            // Reset board and inputs
+            document.getElementById('game-board').innerHTML = '<div class="table" id="poker-table"><div class="community-cards" id="community-cards"></div></div>';
+            document.querySelectorAll('#player-selection input').forEach(input => {
+                input.disabled = false;
+                input.checked = false;
+            });
+            document.getElementById('start-game').disabled = false;
+            document.getElementById('new-game').style.display = 'none';
+        });
+    </script>
+</body>
+</html>
